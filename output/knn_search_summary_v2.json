@@ -1,0 +1,16 @@
+{
+  "model_name": "KNN",
+  "best_params": {
+    "knn__metric": "euclidean",
+    "knn__n_neighbors": 3,
+    "knn__weights": "distance",
+    "pca__n_components": 0.9
+  },
+  "best_cv_accuracy": 0.9757999999999999,
+  "search_time_seconds": 510.54900574684143,
+  "refit_time_seconds": 0.2190542221069336,
+  "total_time_seconds": 510.76805996894836,
+  "cv_folds": 5,
+  "scoring": "accuracy",
+  "num_parameter_combinations": 60
+}
