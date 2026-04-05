@@ -82,19 +82,20 @@ The notebook is organized into 6 sections:
 #### 3a. k-Nearest Neighbors (KNN)
 
 - **Algorithm**: Classifies by majority vote of k nearest training samples
+- **Pipeline**: `Pipeline(PCA + KNN)` -- PCA is fitted only within each CV fold, preventing data leakage
 - **Optimization pipeline**:
-  1. PCA dimensionality reduction -- test 30, 50, 100 components (reduces 784D to best dimension, speeds up distance computation)
-  2. GridSearchCV over k (1,3,5,7,9), distance metric (euclidean, manhattan), and voting weights (uniform, distance)
-  3. Train final model with best parameters on full training set
+  1. GridSearchCV over PCA components (30, 50, 100), k (1,3,5,7,9), distance metric (euclidean, manhattan), and voting weights (uniform, distance)
+  2. Train final pipeline with best parameters on full training set
 - **Output**: k vs. accuracy curve for all configurations
 
 #### 3b. Logistic Regression
 
 - **Algorithm**: Multinomial logistic regression with softmax for 10-class classification
+- **Pipeline**: Independent `Pipeline(PCA + LR)` with its own PCA search space (separate from KNN), PCA fitted within each CV fold
 - **Optimization pipeline**:
-  1. GridSearchCV over regularization strength C (0.01, 0.1, 1.0, 10.0) and solver (lbfgs, saga)
+  1. GridSearchCV over PCA components (30, 50, 100, 150), regularization strength C (0.01, 0.1, 1.0, 10.0), and solver (lbfgs, saga)
   2. L2 penalty for regularization
-  3. Train final model with best parameters (max_iter=2000)
+  3. Train final pipeline with best parameters (max_iter=2000)
 - **Output**: C vs. accuracy curve for different solvers
 
 #### 3c. Neural Network (Bonus)
@@ -151,20 +152,20 @@ Input(1x28x28)
 
 | Model | Test Accuracy | Training Time |
 |-------|--------------|---------------|
-| CNN (Neural Network) | **99.61%** | ~60s |
-| MLP (Neural Network) | 98.55% | ~30s |
+| CNN (Neural Network) | **99.58%** | ~120s |
+| MLP (Neural Network) | 98.62% | ~30s |
 | KNN (Optimized) | 97.65% | ~2s |
-| Logistic Regression | 89.13% | ~5s |
+| Logistic Regression | 92.25% | ~5s |
 
 > Training times measured on MacBook with Apple Silicon (MPS). Times vary by hardware.
 
 ### Key Findings
 
-- **CNN achieves the highest accuracy (99.61%)** by leveraging spatial structure of images through convolutional filters, combined with data augmentation (rotation/translation)
+- **CNN achieves the highest accuracy (99.58%)** by leveraging spatial structure of images through convolutional filters, combined with per-sample data augmentation (rotation/translation)
 - **KNN with PCA + distance-weighted voting** reaches 97.65% with minimal complexity -- PCA(30D) reduces computation while preserving discriminative information
-- **Logistic Regression** is limited by its linear decision boundary (~89%), demonstrating the need for non-linear models on image data
+- **Logistic Regression** with independent PCA(150D) pipeline achieves 92.25%, higher than without PCA optimization, but still limited by its linear decision boundary
 - **t-SNE** produces much clearer digit clusters than PCA in 2D, revealing which digits are visually similar (e.g., 4/9, 3/5)
-- Data augmentation improved CNN accuracy from 99.31% to 99.61%
+- All CV pipelines use `sklearn.pipeline.Pipeline` to prevent PCA data leakage across folds
 
 ## Dependencies
 
