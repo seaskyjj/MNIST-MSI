@@ -255,38 +255,60 @@ Overall conclusion:
 
 ### 7.1 PCA and t-SNE Setup
 
-The visualization section uses a `10,000`-sample subset of the training set.
+The visualization analysis uses a random `10,000`-sample subset drawn from the training set. Two complementary projection methods are applied:
 
-- PCA is applied directly to 2 dimensions.
-- t-SNE is applied to a 50-dimensional PCA projection first, then reduced to 2 dimensions.
+- PCA is applied directly to obtain a 2-dimensional linear projection.
+- t-SNE is applied after an intermediate 50-dimensional PCA reduction for computational efficiency.
 
-The notebook printed:
+The notebook reports the following PCA statistics for the 2-dimensional projection:
 
-- PCA explained variance ratio: `[0.09541446, 0.07158288]`
-- Total variance explained by the first two PCA components: `0.1670`
+- first principal component explained variance ratio: `0.0954`
+- second principal component explained variance ratio: `0.0716`
+- cumulative variance explained by the first two components: `0.1670`
+
+These values indicate that the first two principal components retain only a modest fraction of the total variation in the original 784-dimensional image space. Therefore, the 2D PCA plot should be interpreted as a coarse structural summary rather than a near-lossless representation of the dataset.
 
 ### 7.2 Visual Interpretation
 
-PCA plot:
+#### PCA
 
-- The PCA visualization shows broad global structure but heavy overlap among digit classes.
-- Some classes such as `0`, `1`, `6`, and `9` show partial directional separation, but the clusters are not cleanly isolated.
-- This is expected because PCA is linear and compresses high-dimensional image structure into only two axes.
+The PCA projection reveals broad global organization but substantial class overlap. Several digit classes exhibit directional tendencies in the 2D plane, yet the class clouds remain heavily entangled in the center of the projection. This is especially visible for digits with similar stroke patterns, such as `2`, `3`, `5`, `8`, and `9`.
 
-t-SNE plot:
+From an analytical perspective, the PCA plot supports the following interpretation:
 
-- The t-SNE visualization produces much more distinct local clusters.
-- Most digits form compact, visually interpretable groups.
-- Remaining overlap appears mainly between digits with similar handwriting morphology, which is more informative than the PCA view.
+- MNIST contains meaningful low-dimensional global structure.
+- That global structure is not sufficient, in only two linear components, to separate classes cleanly.
+- A purely linear low-dimensional view does not capture the full discriminative geometry of the dataset.
 
-Conclusion:
+This observation is consistent with the model results. Logistic Regression, which relies on linear decision boundaries after PCA, performs substantially worse than KNN, MLP, and CNN.
 
-- PCA is useful for a coarse global view.
-- t-SNE is much better for visually inspecting class separability in this dataset.
+#### t-SNE
 
-### 7.3 PCA Variance Plot Note
+The t-SNE projection produces a much clearer organization of the data. Most digit classes form compact and visually coherent clusters, with only limited overlap between morphologically similar classes. Compared with PCA, t-SNE makes local neighborhood structure much more explicit.
 
-The saved `pca_variance.png` figure shows the cumulative explained variance for the first 50 principal components. The curve reaches only about `0.83` by component 50 in the displayed plot, so the green marker labeled as `1 components for 95%` should not be interpreted as a valid conclusion. It is inconsistent with the curve shape and should be treated as a plotting artifact in the current notebook output.
+This suggests that:
+
+- in the original high-dimensional feature space, samples from the same class tend to form locally coherent neighborhoods
+- class separation is more apparent in a nonlinear manifold view than in a linear 2D projection
+- methods that exploit local or nonlinear structure are better aligned with the geometry of MNIST
+
+This interpretation is again consistent with the empirical model ranking:
+
+- Logistic Regression is weakest
+- KNN is substantially stronger because it leverages local neighborhood information
+- MLP and CNN outperform both classical baselines because they learn nonlinear decision boundaries
+- CNN performs best because it also exploits the spatial structure of the image
+
+#### Caution in Interpretation
+
+The PCA and t-SNE plots should not be treated as equivalent forms of evidence:
+
+- PCA preserves variance in a linear sense and is more informative about global structure.
+- t-SNE preserves local neighborhood relationships and is more informative about cluster formation.
+- Distances and cluster spacing in t-SNE should not be interpreted as exact global geometric relationships in the original space.
+
+Accordingly, the most defensible conclusion is not that PCA is "bad" and t-SNE is "good," but rather that the two projections answer different questions. PCA shows that the dataset is not easily separable in a very low-dimensional linear subspace, while t-SNE shows that the dataset contains strong local class structure that nonlinear methods can exploit.
+
 
 ## 8. Partial Ablation on Fixed Architecture
 

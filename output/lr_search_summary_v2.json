@@ -7,9 +7,9 @@
     "pca__n_components": 0.99
   },
   "best_cv_accuracy": 0.9215666666666668,
-  "search_time_seconds": 626.565176486969,
-  "refit_time_seconds": 0.86944580078125,
-  "total_time_seconds": 627.4346222877502,
+  "search_time_seconds": 920.0729429721832,
+  "refit_time_seconds": 0.8676009178161621,
+  "total_time_seconds": 920.9405438899994,
   "cv_folds": 5,
   "scoring": "accuracy",
   "num_parameter_combinations": 24
